@@ -2,8 +2,6 @@ import {Schema,model,Model,HydratedDocument} from "mongoose";
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import * as crypto from "crypto";
-import {stringify} from "node:querystring";
-import exp from "node:constants";
 
 interface IUser {
     phoneNumber:number;
@@ -11,7 +9,7 @@ interface IUser {
     priority:number;
     refreshToken:{
         token:string,
-        revoke:string
+        revoke:boolean
     };
 }
 
@@ -42,7 +40,7 @@ const userSchema = new Schema<IUser,UserModel,IUserMethods>({
             type:String
         },
         revoke: {
-            type:String
+            type:Boolean
         }
     }
 })

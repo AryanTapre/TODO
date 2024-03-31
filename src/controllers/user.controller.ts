@@ -3,6 +3,7 @@ import {ApiError} from "../utiles/ApiError.js";
 import {ApiResponse} from "../utiles/ApiResponse.js";
 import {asyncHandler,AsyncHandleType} from "../utiles/AsyncHandler.js";
 import {Request,Response} from 'express';
+import {sendTokens} from "../utiles/sendTokens.js";
 
 const signup = asyncHandler(async (request:Request, response:Response):Promise<void> => {
     const {phoneNumber,password}  = request.body;
@@ -15,7 +16,23 @@ const signup = asyncHandler(async (request:Request, response:Response):Promise<v
         phoneNumber:phoneNumber
     })
 
+    if(existingUser) {
+        response.status(400).json(new ApiResponse(400,null,"user already exists"));
+    }
 
+    const newUser = new User({
+        phoneNumber:phoneNumber,
+        password:password
+    })
+
+
+    await newUser.save().then((savedUser) => {
+        console.log(`user created successfully with id:${savedUser._id}`);
+    }).catch((error) => {
+        throw new ApiError(500,"failed to create new user",[error]);
+    })
+
+    await sendTokens(newUser,response);
 
 })
 
