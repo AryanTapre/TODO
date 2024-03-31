@@ -5,21 +5,18 @@ import {asyncHandler,AsyncHandleType} from "../utiles/AsyncHandler.js";
 import {Request,Response} from 'express';
 
 const signup = asyncHandler(async (request:Request, response:Response):Promise<void> => {
-    const newUser = new User({
-        phoneNumber:request.body?.phoneNumber,
-        password:request.body?.password
-    })
-     await newUser.save().then((savedUser) => {
-         console.log("user created successfully",savedUser)
-     }).catch((error) => {
-         console.log("error while creating user ",error);
-     })
+    const {phoneNumber,password}  = request.body;
 
-    //@ts-ignore
-     newUser.password = undefined;
-    response.status(201).json(
-        new ApiResponse(201,newUser)
-    )
+    if([phoneNumber,password].some(element => element.trim() === "")) {
+        response.status(400).json(new ApiError(400,"phone-number and password are mandatory",["phone-number and password are mandatory"]));
+    }
+
+    const existingUser = await User.findOne({
+        phoneNumber:phoneNumber
+    })
+
+
+
 })
 
 
