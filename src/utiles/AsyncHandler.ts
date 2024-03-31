@@ -1,8 +1,12 @@
-import {NextFunction} from "express";
+import {Request,Response} from "express";
+import {ApiError} from "./ApiError";
+type AsyncHandleType = (request:Request, response:Response) => Promise<void>
 
-export const AsyncHandler = (handleRequest:Function) => (request:Request, response:Response, next:NextFunction) => {
-    Promise.resolve(handleRequest(request,response,next))
-        .catch((error) => {
-            console.log(error);
-        })
+export const  asyncHandler = (handle:AsyncHandleType) => async (request:Request,response:Response) => {
+    try{
+        await handle(request,response);
+    } catch (error) {
+        throw new ApiError(500,'asyncHanler failed',[error]);
+    }
 }
+

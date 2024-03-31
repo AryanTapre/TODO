@@ -1,9 +1,28 @@
-import mongoose from "mongoose";
+import {Schema,model,Model} from "mongoose";
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import {randomBytes,createHash} from "crypto";
+import * as crypto from "crypto";
+import {Mode} from "node:fs";
 
-const userSchema = new mongoose.Schema({
+type UserSchemaType =  {
+    phoneNumber:String;
+    password:String;
+    priority:Number;
+    refreshToken: {
+        token:String,
+        revoke:Boolean
+    };
+}
+
+type UserSchemaMethodType = {
+    validatePassword():Promise<void>;
+    generateAccessToken:string;
+    generateRefreshToken:string;
+}
+
+type UserModel = Model<UserSchemaType,{},UserSchemaMethodType>;
+
+const userSchema:Schema = new Schema<UserSchemaType,UserModel,UserSchemaMethodType>({
     phoneNumber:{
         type: Number,
         minLength:[10,'mobile number must be of 10 digits'],
@@ -19,19 +38,25 @@ const userSchema = new mongoose.Schema({
         type: Number
     },
     refreshToken: {
-        type: String
+        token: {
+            type:String
+        },
+        revoke: {
+            type:String
+        }
     }
-});
+})
 
 userSchema.pre('save',async function ():Promise<void> {
     this.password = await bcrypt.hash(this.password,20);
 })
 
-userSchema.methods.validatePassword = async function (userPassword:string):Promise<boolean> {
-    return await bcrypt.compare(userPassword, this.password);
-}
 
-userSchema.methods.generateAccessToken = function ():jwt {
+userSchema.method('validatePassword',async function validatePassword (userPassword:string):Promise<boolean> {
+    return await bcrypt.compare(userPassword, this.password);
+})
+
+userSchema.method('generateAccessToken',function generateAccessToken ():string {
     return jwt.sign(
         {id:this._id},
         process.env.JWT_SECRET_KEY,
@@ -39,11 +64,12 @@ userSchema.methods.generateAccessToken = function ():jwt {
             expiresIn:process.env.JWT_SECRET_EXPIRY
         }
     )
-}
+})
 
-userSchema.methods.generateRefreshToken = function ():jwt {
-    const refreshToken:string = randomBytes(20).toString();
-    this.refreshToken = createHash('sha512').update(refreshToken).digest("hex");
+
+userSchema.method('generateRefreshToken',function generateRefreshToken ():string {
+    const refreshToken:string = crypto.randomBytes(20).toString();
+    this.refreshToken = crypto.createHash('sha512').update(refreshToken).digest("hex");
 
     return jwt.sign(
         {
@@ -55,6 +81,8 @@ userSchema.methods.generateRefreshToken = function ():jwt {
             expiresIn: process.env.JWT_SECRET_EXPIRY
         }
     )
-}
+})
 
-export default mongoose.model("user",userSchema);
+
+const User = model<UserSchemaType,UserModel>('user',userSchema);
+export {User};
