@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "nodemon dist/index.js"
   },
+  "type": "module",
   "keywords": [],
   "author": "",
   "license": "ISC",

@@ -4,6 +4,7 @@ import morgan from "morgan";
 import {config} from 'dotenv';
 import cors from 'cors';
 import cookieParser from "cookie-parser";
+import {userRouter} from "../routes/user.route.js";
 
 config({
     path:'src/environmentVariables/.env'
@@ -25,5 +26,7 @@ app.use(cors({
     origin: process.env.CORS_ORIGIN,
     credentials: true
 }))
+
+app.use('/api/v1',userRouter);
 
 export {app};
