@@ -5,8 +5,13 @@ import {asyncHandler,AsyncHandleType} from "../utiles/AsyncHandler.js";
 import {Request,Response} from 'express';
 import {sendTokens} from "../utiles/sendTokens.js";
 
+
+
 const signup = asyncHandler(async (request:Request, response:Response):Promise<void> => {
     try {
+
+        console.log("response object:",response);
+        console.log("request object:",request);
         const {phoneNumber,password}  = request.body;
 
         if([phoneNumber,password].some(element => element.trim() === "")) {
@@ -18,8 +23,10 @@ const signup = asyncHandler(async (request:Request, response:Response):Promise<v
         })
 
         if(existingUser) {
-            response.status(400).json(new ApiResponse(400,null,"user already exists"));
+             response.status(400).json(new ApiResponse(400,null,"user already exists"));
+             return;
         }
+
 
         const newUser = new User({
             phoneNumber:phoneNumber,
@@ -40,6 +47,8 @@ const signup = asyncHandler(async (request:Request, response:Response):Promise<v
     }
 
 })
+
+
 
 
 export {signup};

@@ -12,6 +12,7 @@ const sendTokens = async (user:any,response:Response) => {
 
 
         user.password = undefined;
+	
 
         response
             .status(201)
@@ -31,7 +32,7 @@ const sendTokens = async (user:any,response:Response) => {
 
 
     } catch(error) {
-        throw new ApiError(500,'sendTokens error',[error]);
+        throw new ApiError(500,'sendTokens error',error as Array<string>);
     }
 }
 

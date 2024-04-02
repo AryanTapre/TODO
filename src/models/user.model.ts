@@ -1,4 +1,4 @@
-import {Schema,model,Model,HydratedDocument} from "mongoose";
+import {Schema,model,Model} from "mongoose";
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import * as crypto from "crypto";
